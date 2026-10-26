@@ -21,14 +21,20 @@
 
 ### 실행 및 테스트
 
-Python 3.12와 uv를 설치한 뒤 프로젝트 루트에서 진행합니다.
+Python 3.12, uv, Docker Compose를 설치하고 Docker를 실행한 뒤 프로젝트 루트에서 진행합니다.
 
 ```bash
 uv sync --frozen
-# .env.local에 본인의 MySQL 접속 정보와 생성한 데이터베이스 이름 설정
+docker compose up -d --wait
+# 모델 작성 및 마이그레이션 스크립트 생성 후 적용
 uv run alembic upgrade head
 uv run uvicorn wapang.main:app --reload
 ```
+
+- Compose는 MySQL 8.4와 `wapang` 데이터베이스를 생성합니다. `.env.local`은 `127.0.0.1:3307`, 사용자 `wapang`, 비밀번호 `local-password`로 맞춰져 있어 수정 없이 연결할 수 있습니다. 기존 로컬 MySQL과의 충돌을 줄이기 위해 호스트 포트는 3307을 사용합니다.
+- API 서버는 호스트에서 실행하며, Docker에는 DB만 실행합니다. 위 명령은 기본값인 `ENV=local` 기준입니다.
+- DB를 중지할 때는 `docker compose down`을 실행합니다. 데이터는 볼륨에 남습니다. **`docker compose down -v`는 로컬 DB 데이터를 모두 삭제**하므로 초기화가 필요할 때만 사용합니다.
+- Compose의 DB 계정은 최초 볼륨 생성 시 설정됩니다. 계정 값을 바꿔도 기존 볼륨의 계정은 자동 변경되지 않습니다.
 
 - API 기본 경로는 `/api`이며, 문서는 `http://127.0.0.1:8000/docs`에서 확인합니다.
 - 새 모델을 작성한 뒤에는 아래 마이그레이션 안내에 따라 revision을 생성해야 합니다. 템플릿에는 완성된 마이그레이션이 없습니다.
@@ -102,7 +108,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 마이그레이션에 필요한 환경 변수를 설정하기 위한 골격은 스켈레톤 코드에 함께 제공되었습니다.  
 스켈레톤 코드와 [Pydantic Settings 공식 문서](https://docs.pydantic.dev/latest/concepts/pydantic_settings/)를 탐구한 후 SQLAlchemy ORM 모델의 구조와 DB 구조를 연동하기 위한 환경 변수를 설정하세요.  
 - 참고
-	- 각자의 로컬 DB 환경에서 테스트하실 수 있도록 `.env.local` 파일을 수정하시면 됩니다.  
+	- 제공된 Compose를 사용하면 `.env.local`을 수정할 필요가 없습니다. 별도 MySQL을 사용하는 경우에만 접속 정보를 수정해주세요.
 	- 수정하신 `.env.local` 파일을 commit하실 필요는 없습니다(사실 `.env` 파일을 git에 포함시키는 것은 권장되지 않습니다. 본 과제에서는 코드의 골격 제시를 위해 부득이하게 포함하였습니다).  
 	- `.env.test`는 채점 시 사용되므로 **건드리지 말아주세요.**  
 	- `.env.prod`는 배포 환경 설정의 예시입니다. RDS 접속 정보와 인증 키는 GitHub Secrets 또는 EC2의 환경변수로 주입하고, 실제 값을 저장소에 커밋하지 마세요.
