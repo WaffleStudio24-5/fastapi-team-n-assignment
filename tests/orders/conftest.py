@@ -17,7 +17,7 @@ def order_items(
             "price": 5000 + i * 2000,
             "stock": 10 + i * 5
         }
-        res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+        res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
         res_json = res.json()
         assert res.status_code == 201
         assert res_json["item_name"] == req["item_name"]
@@ -32,7 +32,7 @@ def order_items(
             "price": 3000 + i * 1000,
             "stock": 20 + i * 10
         }
-        res = client.post("/items", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+        res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
         res_json = res.json()
         assert res.status_code == 201
         assert res_json["item_name"] == req["item_name"]
@@ -52,7 +52,7 @@ def order(client: TestClient, access_token: str, order_items: list[dict]) -> dic
             "quantity": random.randint(1, item["stock"])
         })
 
-    res = client.post("/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 201
     res_json = res.json()
     assert res_json["order_id"] is not None

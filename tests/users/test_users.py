@@ -15,7 +15,7 @@ def test_signup(
         "password": "password123"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 201
@@ -23,7 +23,7 @@ def test_signup(
     assert res_json["email"] == "test1234@snu.ac.kr"
     
     # 로그인 테스트
-    res = client.post("/auth/tokens", json=req)
+    res = client.post("/api/auth/tokens", json=req)
     res_json = res.json()
     
     assert res.status_code == 200
@@ -35,7 +35,7 @@ def test_signup_missing_email(
         "password": "password123"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -49,7 +49,7 @@ def test_signup_missing_password(
         "email": "test1234@snu.ac.kr"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -64,7 +64,7 @@ def test_signup_invalid_email(
         "password": "password123"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -79,7 +79,7 @@ def test_signup_short_password(
         "password": "short"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -94,7 +94,7 @@ def test_signup_long_password(
         "password": "longpasswordlongpassword"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -111,7 +111,7 @@ def test_signup_email_conflict(
         "password": "password321"
     }
 
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
 
     assert res.status_code == 409
@@ -125,14 +125,14 @@ def test_get_me(
 ):
     auth_header = {"Authorization": f"Bearer {access_token}"}
     
-    res = client.get("/users/me", headers=auth_header)
+    res = client.get("/api/users/me", headers=auth_header)
     
     assert res.status_code == 200
     
 def test_get_me_without_header(
     client: TestClient
 ):
-    res = client.get("/users/me")
+    res = client.get("/api/users/me")
     res_json = res.json()
     
     assert res.status_code == 401
@@ -145,7 +145,7 @@ def test_get_me_invalid_header(
 ):
     invalid_header = {"Authorization": f"{access_token}"}
     
-    res = client.get("/users/me", headers=invalid_header)
+    res = client.get("/api/users/me", headers=invalid_header)
     res_json = res.json()
     
     assert res.status_code == 400
@@ -157,7 +157,7 @@ def test_get_me_invalid_token(
 ):
     auth_header = {"Authorization": f"Bearer invalidtoken"}
     
-    res = client.get("/users/me", headers=auth_header)
+    res = client.get("/api/users/me", headers=auth_header)
     res_json = res.json()
     
     assert res.status_code == 401
@@ -175,7 +175,7 @@ def test_patch_me(
         "address": "Seoul"
     }
 
-    res = client.patch("/users/me", headers=auth_header, json=req)
+    res = client.patch("/api/users/me", headers=auth_header, json=req)
     res_json=res.json()
 
     assert res.status_code == 200
@@ -197,7 +197,7 @@ def test_patch_me_random(
         to_update: possible[to_update]
     }
     print(to_update)
-    res = client.patch("/users/me", headers=auth_header, json=req)
+    res = client.patch("/api/users/me", headers=auth_header, json=req)
     res_json=res.json()
 
     assert res.status_code == 200
@@ -212,7 +212,7 @@ def test_patch_me_invalid_req(
         "invalid": "content"
     }
 
-    res = client.patch("/users/me", headers=auth_header, json=req)
+    res = client.patch("/api/users/me", headers=auth_header, json=req)
     res_json=res.json()
 
     assert res.status_code == 400
@@ -226,7 +226,7 @@ def test_patch_me_without_token(
         "nickname": "waffle"
     }
 
-    res = client.patch("/users/me", json=req)
+    res = client.patch("/api/users/me", json=req)
     res_json=res.json()
 
     assert res.status_code == 401
@@ -241,7 +241,7 @@ def test_get_me_orders(
 ):
     auth_header = {"Authorization": f"Bearer {access_token}"}
 
-    res = client.get("/users/me/orders", headers=auth_header)
+    res = client.get("/api/users/me/orders", headers=auth_header)
     res_json = res.json()
 
     assert res.status_code == 200
@@ -257,7 +257,7 @@ def test_get_me_reviews(
 ):
     auth_header = {"Authorization": f"Bearer {access_token}"}
 
-    res = client.get("/users/me/reviews", headers=auth_header)
+    res = client.get("/api/users/me/reviews", headers=auth_header)
     res_json = res.json()
 
     assert res.status_code == 200

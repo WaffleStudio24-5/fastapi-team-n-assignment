@@ -15,7 +15,7 @@ def test_create_order(
             "quantity": random.randint(1, item["stock"])
         })
 
-    res = client.post("/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 201
     res_json = res.json()
     assert res_json["order_id"] is not None
@@ -67,7 +67,7 @@ def test_create_order_with_nonexistent_item(
         "quantity": 1
     })
 
-    res = client.post("/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_013"
@@ -83,7 +83,7 @@ def test_create_order_with_not_enough_stock(
         "quantity": item["stock"] + 10
     }]
 
-    res = client.post("/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_017"
@@ -95,7 +95,7 @@ def test_create_order_with_no_items(
 ):
     req = []
 
-    res = client.post("/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 422
     res_json = res.json()
     assert res_json["error_code"] == "ERR_018"
@@ -107,7 +107,7 @@ def test_get_order(
     order: dict,
 ):
     order_id = order["order_id"]
-    res = client.get(f"/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json == order
@@ -118,7 +118,7 @@ def test_get_order_with_invalid_order_id(
     order: dict,
 ):
     order_id = "invalid_order_id"
-    res = client.get(f"/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_019"
@@ -131,7 +131,7 @@ def test_get_order_of_another_user(
     order: dict,
 ):
     order_id = order["order_id"]
-    res = client.get(f"/orders/{order_id}", headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.get(f"/api/orders/{order_id}", headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_020"
@@ -146,12 +146,11 @@ def test_update_order_status(
     req = {
         "status": "CANCELED"
     }
-    res = client.patch(f"/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
-    assert res.status_code == 200
-    res_json = res.json()
-    assert res_json["status"] == "CANCELED"
+    res = client.patch(f"/api/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    assert res.status_code == 204
+    assert res.content == b""
 
-    res = client.get(f"/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/orders/{order_id}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["status"] == "CANCELED"
@@ -165,12 +164,11 @@ def test_update_order_status_already_canceled(
     req = {
         "status": "CANCELED"
     }
-    res = client.patch(f"/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
-    assert res.status_code == 200
-    res_json = res.json()
-    assert res_json["status"] == "CANCELED"
+    res = client.patch(f"/api/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    assert res.status_code == 204
+    assert res.content == b""
 
-    res = client.patch(f"/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_021"
@@ -186,7 +184,7 @@ def test_update_order_status_of_another_user(
     req = {
         "status": "CANCELED"
     }
-    res = client.patch(f"/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_020"
@@ -201,7 +199,7 @@ def test_update_order_status_with_invalid_order_id(
     req = {
         "status": "CANCELED"
     }
-    res = client.patch(f"/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/orders/{order_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_019"
@@ -212,7 +210,7 @@ def test_get_orders_by_user(
     access_token: str,
     order: dict,
 ):
-    res = client.get("/users/me/orders", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get("/api/users/me/orders", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert isinstance(res_json, list)

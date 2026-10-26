@@ -8,7 +8,7 @@ def add_to_cart(client: TestClient, access_token: str):
 
 	def _add(item_id: str, quantity: int):
 		return client.patch(
-			"/carts",
+			"/api/carts",
 			json={"item_id": item_id, "quantity": quantity},
 			headers={"Authorization": f"Bearer {access_token}"},
 		)
@@ -22,7 +22,7 @@ def get_cart(client: TestClient, access_token: str):
 
 	def _get():
 		return client.get(
-			"/carts",
+			"/api/carts",
 			headers={"Authorization": f"Bearer {access_token}"},
 		)
 
@@ -35,7 +35,7 @@ def clear_cart(client: TestClient, access_token: str):
 
 	def _clear():
 		return client.delete(
-			"/carts",
+			"/api/carts",
 			headers={"Authorization": f"Bearer {access_token}"},
 		)
 
@@ -48,7 +48,7 @@ def checkout_cart(client: TestClient, access_token: str):
 
 	def _checkout():
 		return client.post(
-			"/carts/checkout",
+			"/api/carts/checkout",
 			headers={"Authorization": f"Bearer {access_token}"},
 		)
 

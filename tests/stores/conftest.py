@@ -17,7 +17,7 @@ def store(
     access_token: str,
     store_create_request: dict,
 ) -> dict:
-    res = client.post("/stores", json=store_create_request, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=store_create_request, headers={"Authorization": f"Bearer {access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["store_name"] == store_create_request["store_name"]
@@ -39,7 +39,7 @@ def store_2(
         "phone_number": "010-2345-6789",
         "delivery_fee": 4000
     }
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["store_name"] == req["store_name"]

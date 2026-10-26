@@ -15,7 +15,7 @@ def store(
         "delivery_fee": 500
     }
 
-    res = client.post("/stores", headers=auth_header, json=req)
+    res = client.post("/api/stores", headers=auth_header, json=req)
 
     assert res.status_code == 201
 
@@ -35,7 +35,7 @@ def items(
             "price": 5000+(1000*i),
             "stock": 100
         }
-        res = client.post("/items", headers=auth_header, json=req)
+        res = client.post("/api/items", headers=auth_header, json=req)
         item_list.append(res.json())
         
         assert res.status_code == 201
@@ -58,7 +58,7 @@ def orders(
                 }
             ]
         }
-        res = client.post("/orders", headers=auth_header, json=req)
+        res = client.post("/api/orders", headers=auth_header, json=req)
         order_list.append(res.json())
 
         assert res.status_code == 201
@@ -74,13 +74,13 @@ def reviews(
     req = {
         "nickname": "waffle",
     }
-    res = client.patch("/users/me", headers=auth_header, json=req)
+    res = client.patch("/api/users/me", headers=auth_header, json=req)
     assert res.status_code == 200
 
     req = {
         "rating": 3,
         "comment": "good"
     }
-    res = client.post(f"/items/{items[0]["id"]}/reviews", headers=auth_header, json=req)
+    res = client.post(f"/api/items/{items[0]["id"]}/reviews", headers=auth_header, json=req)
     assert res.status_code == 201
     

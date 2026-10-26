@@ -11,7 +11,7 @@ def test_create_review(
         "nickname": "김와플",
         "phone_number": "010-1234-5678",
     }
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -19,7 +19,7 @@ def test_create_review(
         "rating": 5,
         "comment": "Great"
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 201
     res_json = res.json()
     assert res_json["review_id"] is not None
@@ -38,7 +38,7 @@ def test_create_review_with_nonexistent_item(
         "nickname": "김와플",
         "phone_number": "010-1234-5678",
     }
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -48,7 +48,7 @@ def test_create_review_with_nonexistent_item(
     }
 
     item_id = "nonexistent_item_id"
-    res = client.post(f"/items/{item_id}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item_id}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_013"
@@ -64,7 +64,7 @@ def test_create_review_with_invalid_rating(
         "nickname": "김와플",
         "phone_number": "010-1234-5678",
     }
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -73,7 +73,7 @@ def test_create_review_with_invalid_rating(
         "rating": 6,
         "comment": "Great"
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     res_json = res.json()
     assert res_json["error_code"] == "ERR_003"
@@ -89,7 +89,7 @@ def test_create_review_with_invalid_comment(
         "nickname": "김와플",
         "phone_number": "010-1234-5678",
     }
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -98,7 +98,7 @@ def test_create_review_with_invalid_comment(
         "rating": 4,
         "comment": "A" * 501
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     res_json = res.json()
     assert res_json["error_code"] == "ERR_003"
@@ -113,7 +113,7 @@ def test_create_review_with_nickname_not_set(
         "rating": 4,
         "comment": "Good"
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 422
     res_json = res.json()
     assert res_json["error_code"] == "ERR_015"
@@ -124,7 +124,7 @@ def test_get_review_with_login(
     access_token: str,
     review: dict
 ):
-    res = client.get(f"/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["review_id"] == review["review_id"]
@@ -138,7 +138,7 @@ def test_get_review_without_login(
     client: TestClient,
     review: dict
 ):
-    res = client.get(f"/reviews/{review['review_id']}")
+    res = client.get(f"/api/reviews/{review['review_id']}")
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["review_id"] == review["review_id"]
@@ -156,7 +156,7 @@ def test_update_review(
         "rating": 3,
         "comment": "So-so"
     }
-    res = client.patch(f"/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["review_id"] == review["review_id"]
@@ -176,7 +176,7 @@ def test_update_review_of_another_user(
         "rating": 3,
         "comment": "So-so"
     }
-    res = client.patch(f"/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_023"
@@ -191,7 +191,7 @@ def test_update_review_with_invalid_rating(
         "rating": 0,
         "comment": "So-so"
     }
-    res = client.patch(f"/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     res_json = res.json()
     assert res_json["error_code"] == "ERR_003"
@@ -206,7 +206,7 @@ def test_update_review_with_invalid_comment(
         "rating": 4,
         "comment": "A" * 501
     }
-    res = client.patch(f"/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/reviews/{review['review_id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     res_json = res.json()
     assert res_json["error_code"] == "ERR_003"
@@ -221,7 +221,7 @@ def test_update_review_with_review_not_found(
         "comment": "Good"
     }
     review_id = "nonexistent_review_id"
-    res = client.patch(f"/reviews/{review_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/reviews/{review_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_022"
@@ -232,10 +232,10 @@ def test_delete_review(
     access_token: str,
     review: dict
 ):
-    res = client.delete(f"/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.delete(f"/api/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 204
 
-    res = client.get(f"/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_022"
@@ -247,7 +247,7 @@ def test_delete_review_of_another_user(
     another_user_access_token: str,
     review: dict
 ):
-    res = client.delete(f"/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.delete(f"/api/reviews/{review['review_id']}", headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_023"
@@ -258,7 +258,7 @@ def test_delete_review_with_review_not_found(
     access_token: str,
 ):
     review_id = "nonexistent_review_id"
-    res = client.delete(f"/reviews/{review_id}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.delete(f"/api/reviews/{review_id}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_022"
@@ -271,7 +271,7 @@ def test_list_reviews_with_login(
     review: dict,
     another_review: dict
 ):
-    res = client.get(f"/items/{item['id']}/reviews", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/items/{item['id']}/reviews", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     for r in res_json:
@@ -296,7 +296,7 @@ def test_list_reviews_without_login(
     review: dict,
     another_review: dict
 ):
-    res = client.get(f"/items/{item['id']}/reviews")
+    res = client.get(f"/api/items/{item['id']}/reviews")
     assert res.status_code == 200
     res_json = res.json()
     for r in res_json:
@@ -321,7 +321,7 @@ def test_list_reviews_with_nonexistent_item(
     item: dict,
 ):
     item_id = "nonexistent_item_id"
-    res = client.get(f"/items/{item_id}/reviews", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get(f"/api/items/{item_id}/reviews", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_013"
@@ -332,7 +332,7 @@ def test_list_user_reviews(
     access_token: str,
     reviews: dict,
 ):
-    res = client.get("/users/me/reviews", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.get("/api/users/me/reviews", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert len(res_json) == len(reviews)

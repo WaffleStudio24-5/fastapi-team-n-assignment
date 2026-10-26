@@ -1,23 +1,25 @@
-name: Autograding Tests
+name: Required Assignment Tests
 
 on:
-    push:
-        branches:
-            - main
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
 
 jobs:
-    run-tests:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v4
-              with:
-                ref: main
-            - name: Install uv
-              uses: astral-sh/setup-uv@v6
-            - name: Install dependencies
-              run: uv sync
-            - name: Install test dependecies
-              run: uv add pytest
-            - name: Grade
-              run: ENV=test uv run pytest
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: uv sync --frozen
+      - name: Run required tests
+        env:
+          ENV: test
+        run: uv run pytest

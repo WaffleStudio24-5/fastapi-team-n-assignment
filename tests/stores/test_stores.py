@@ -7,7 +7,7 @@ def test_create_store(
     access_token: str,
     store_create_request: dict,
 ):
-    res = client.post("/stores", json=store_create_request, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=store_create_request, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 201
     res_json = res.json()
     assert res_json["id"] is not None
@@ -25,7 +25,7 @@ def test_create_store_with_missing_fields(
     req = store_create_request
     del req["store_name"]
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_002"
     assert res.json()["error_msg"] == "MISSING REQUIRED FIELDS"
@@ -38,7 +38,7 @@ def test_create_store_with_short_store_name(
     req = store_create_request
     req["store_name"] = "A"
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -51,7 +51,7 @@ def test_create_store_with_long_store_name(
     req = store_create_request
     req["store_name"] = "A" * 21
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
 
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
@@ -66,7 +66,7 @@ def test_create_store_with_long_address(
     req = store_create_request
     req["address"] = "A" * 101
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
 
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
@@ -80,7 +80,7 @@ def test_create_store_with_invalid_delivery_fee(
     req = store_create_request
     req["delivery_fee"] = -100
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
 
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
@@ -100,7 +100,7 @@ def test_create_store_store_name_conflict(
         "delivery_fee": 4000
     }
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
 
     assert res.status_code == 409
     res_json = res.json()
@@ -120,7 +120,7 @@ def test_create_store_email_conflict(
         "delivery_fee": 4000
     }
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_009"
@@ -138,7 +138,7 @@ def test_create_store_phone_number_conflict(
         "phone_number": "010-1234-5678",
         "delivery_fee": 4000
     }
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_009"
@@ -157,7 +157,7 @@ def test_create_store_already_exists(
         "delivery_fee": 4000
     }
 
-    res = client.post("/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/stores", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_008"
@@ -177,7 +177,7 @@ def test_patch_store(
         "delivery_fee": 5000
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["id"] == store_id
@@ -201,7 +201,7 @@ def test_patch_store_with_long_name(
         "delivery_fee": 5000
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -220,7 +220,7 @@ def test_patch_store_with_long_address(
         "delivery_fee": 5000
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -239,7 +239,7 @@ def test_patch_store_with_invalid_delivery_fee(
         "delivery_fee": -100
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -257,7 +257,7 @@ def test_patch_store_not_found(
         "delivery_fee": 5000
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_010"
@@ -276,7 +276,7 @@ def test_patch_store_not_owned(
         "delivery_fee": 5000
     }
     store_id = store["id"]
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_011"
@@ -297,7 +297,7 @@ def test_patch_store_unauthorized(
         "delivery_fee": 5000
     }
 
-    res = client.patch(f"/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/stores/{store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     res_json = res.json()
     assert res_json["error_code"] == "ERR_012"
@@ -313,7 +313,7 @@ def test_patch_store_store_name_conflict(
         "store_name": store["store_name"],
     }
 
-    res = client.patch(f"/stores/{store_2['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/stores/{store_2['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_009"
@@ -329,7 +329,7 @@ def test_patch_store_email_conflict(
     req = {
         "email": store["email"],
     }
-    res = client.patch(f"/stores/{another_store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/stores/{another_store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_009"
@@ -345,7 +345,7 @@ def test_patch_store_phone_number_conflict(
     req = {
         "phone_number": store["phone_number"],
     }
-    res = client.patch(f"/stores/{another_store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/stores/{another_store_id}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 409
     res_json = res.json()
     assert res_json["error_code"] == "ERR_009"
@@ -357,7 +357,7 @@ def test_get_store(
 ):
     store_id = store["id"]
 
-    res = client.get(f"/stores/{store_id}")
+    res = client.get(f"/api/stores/{store_id}")
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["id"] == store_id
@@ -372,7 +372,7 @@ def test_get_store_not_found(
 ):
     store_id = 99999
 
-    res = client.get(f"/stores/{store_id}")
+    res = client.get(f"/api/stores/{store_id}")
     assert res.status_code == 404
     res_json = res.json()
     assert res_json["error_code"] == "ERR_010"

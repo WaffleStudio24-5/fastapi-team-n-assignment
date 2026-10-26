@@ -8,7 +8,6 @@ from sqlalchemy import orm
 from sqlalchemy.pool import StaticPool
 
 from wapang.main import app
-from wapang.api import api_router
 from wapang.app.users.models import User
 from wapang.database.common import Base
 from wapang.database.settings import DB_SETTINGS
@@ -65,15 +64,18 @@ def db_session(db_engine: sqlalchemy.Engine) -> Iterable[orm.Session]:
 
 
 @pytest.fixture
-def client(db_session: orm.Session) -> TestClient:
-    app.include_router(api_router)
+def client(db_session: orm.Session) -> Iterable[TestClient]:
 
     def override_get_db_session():
         return db_session
 
     app.dependency_overrides[get_db_session] = override_get_db_session
     client = TestClient(app)
-    return client
+    try:
+        yield client
+    finally:
+        app.dependency_overrides.pop(get_db_session, None)
+        client.close()
 
 @pytest.fixture
 def user(
@@ -84,7 +86,7 @@ def user(
         "password": "password123"
     }
     
-    res = client.post("/users", json=req)
+    res = client.post("/api/users", json=req)
     res_json = res.json()
     
     return User(
@@ -104,7 +106,7 @@ def token(
         "email": "test1234@snu.ac.kr",
         "password": "password123"
     }
-    res = client.post("/auth/tokens", json=req)
+    res = client.post("/api/auth/tokens", json=req)
     res_json = res.json()
     
     return {
@@ -126,10 +128,10 @@ def another_user_access_token(
         "email": "another_user@snu.ac.kr",
         "password": "password1234"
     }
-    client.post("/users", json=signup_req)
+    client.post("/api/users", json=signup_req)
 
     signin_req = signup_req
-    res = client.post("/auth/tokens", json=signin_req)
+    res = client.post("/api/auth/tokens", json=signin_req)
     res_json = res.json()
 
     return res_json["access_token"]

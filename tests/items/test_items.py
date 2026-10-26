@@ -6,7 +6,7 @@ def test_create_item(
     store: dict,
     item_create_request: dict
 ):
-    res = client.post("/items", json=item_create_request, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=item_create_request, headers={"Authorization": f"Bearer {access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["item_name"] == item_create_request["item_name"]
@@ -22,7 +22,7 @@ def test_create_item_missing_field(
         "item_name": "초콜릿",
         "price": 5000
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_002"
     assert res.json()["error_msg"] == "MISSING REQUIRED FIELDS"
@@ -37,7 +37,7 @@ def test_create_item_with_long_item_name(
         "price": 5000,
         "stock": 20
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -52,7 +52,7 @@ def test_create_item_with_negative_price(
         "price": -5000,
         "stock": 20
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -67,7 +67,7 @@ def test_create_item_with_negative_stock(
         "price": 5000,
         "stock": -20
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -82,7 +82,7 @@ def test_create_item_with_no_store(
         "price": 5000,
         "stock": 20
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 403
     assert res.json()["error_code"] == "ERR_011"
     assert res.json()["error_msg"] == "NO STORE OWNED"
@@ -97,7 +97,7 @@ def test_patch_item(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     res_json = res.json()
     assert res.status_code == 200
     assert res_json["item_name"] == req["item_name"]
@@ -114,7 +114,7 @@ def test_patch_item_with_long_item_name(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -129,7 +129,7 @@ def test_patch_item_with_negative_price(
         "price": -6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -144,7 +144,7 @@ def test_patch_item_with_negative_stock(
         "price": 6000,
         "stock": -30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 400
     assert res.json()["error_code"] == "ERR_003"
     assert res.json()["error_msg"] == "INVALID FIELD FORMAT"
@@ -158,7 +158,7 @@ def test_patch_item_with_no_price(
         "item_name": "쿠키",
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["item_name"] == req["item_name"]
@@ -174,7 +174,7 @@ def test_patch_item_with_no_stock(
         "item_name": "쿠키",
         "price": 6000
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["item_name"] == req["item_name"]
@@ -190,7 +190,7 @@ def test_patch_item_with_no_item_name(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 200
     res_json = res.json()
     assert res_json["item_name"] == item["item_name"]
@@ -207,7 +207,7 @@ def test_patch_item_not_found(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/9999", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.patch(f"/api/items/9999", json=req, headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     assert res.json()["error_code"] == "ERR_013"
     assert res.json()["error_msg"] == "ITEM NOT FOUND"
@@ -222,7 +222,7 @@ def test_patch_item_with_no_store(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     assert res.json()["error_code"] == "ERR_011"
     assert res.json()["error_msg"] == "NO STORE OWNED"
@@ -238,7 +238,7 @@ def test_patch_item_of_another_store(
         "price": 6000,
         "stock": 30
     }
-    res = client.patch(f"/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.patch(f"/api/items/{item['id']}", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     assert res.json()["error_code"] == "ERR_014"
     assert res.json()["error_msg"] == "NOT YOUR ITEM"
@@ -255,7 +255,7 @@ def test_get_items(
         "in_stock": True,
     }
 
-    res = client.get("/items", params=query_params)
+    res = client.get("/api/items", params=query_params)
     res_json = res.json()
     assert res.status_code == 200
     for item in res_json:
@@ -274,7 +274,7 @@ def test_get_items_no_store(
         "in_stock": True,
     }
 
-    res = client.get("/items", params=query_params)
+    res = client.get("/api/items", params=query_params)
     res_json = res.json()
     assert res.status_code == 404
     assert res_json["error_code"] == "ERR_010"
@@ -285,7 +285,7 @@ def test_delete_item(
     access_token: str,
     item: dict
 ):
-    res = client.delete(f"/items/{item['id']}", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.delete(f"/api/items/{item['id']}", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 204
 
 def test_delete_item_not_found(
@@ -293,7 +293,7 @@ def test_delete_item_not_found(
     access_token: str,
     store: dict,
 ):
-    res = client.delete(f"/items/9999", headers={"Authorization": f"Bearer {access_token}"})
+    res = client.delete(f"/api/items/9999", headers={"Authorization": f"Bearer {access_token}"})
     assert res.status_code == 404
     assert res.json()["error_code"] == "ERR_013"
     assert res.json()["error_msg"] == "ITEM NOT FOUND"
@@ -305,7 +305,7 @@ def test_delete_item_no_access(
     store_2: dict,
     another_user_access_token: str,
 ):
-    res = client.delete(f"/items/{item['id']}", headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.delete(f"/api/items/{item['id']}", headers={"Authorization": f"Bearer {another_user_access_token}"})
     assert res.status_code == 403
     assert res.json()["error_code"] == "ERR_014"
     assert res.json()["error_msg"] == "NOT YOUR ITEM"
@@ -316,7 +316,7 @@ def test_get_store_items(
     items: dict,
 ):
     store_id = store["id"]
-    res = client.get(f"/stores/{store_id}/items")
+    res = client.get(f"/api/stores/{store_id}/items")
     res_json = res.json()
     assert res.status_code == 200
     item_ids = {item['id'] for item in items}
@@ -329,7 +329,7 @@ def test_get_store_items(
 def test_get_store_items_no_store(
     client: TestClient,
 ):
-    res = client.get(f"/stores/9999/items")
+    res = client.get(f"/api/stores/9999/items")
     res_json = res.json()
     assert res.status_code == 404
     assert res_json["error_code"] == "ERR_010"

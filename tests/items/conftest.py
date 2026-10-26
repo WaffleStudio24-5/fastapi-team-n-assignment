@@ -16,7 +16,7 @@ def item(
     store: dict,
     item_create_request: dict
 ):
-    res = client.post("/items", json=item_create_request, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=item_create_request, headers={"Authorization": f"Bearer {access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["id"] is not None
@@ -36,7 +36,7 @@ def item_2(
         "price": 3000,
         "stock": 30
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["item_name"] == req["item_name"]
@@ -57,7 +57,7 @@ def items(
             "price": 5000 + i * 2000,
             "stock": 10 + i * 5
         }
-        res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+        res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
         res_json = res.json()
         assert res.status_code == 201
         assert res_json["item_name"] == req["item_name"]
@@ -69,7 +69,7 @@ def items(
         "price": 3000,
         "stock": 0
     }
-    res = client.post("/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post("/api/items", json=req, headers={"Authorization": f"Bearer {access_token}"})
     res_json = res.json()
     assert res.status_code == 201
     assert res_json["item_name"] == req["item_name"]

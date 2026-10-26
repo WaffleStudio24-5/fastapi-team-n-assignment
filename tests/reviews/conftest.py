@@ -14,7 +14,7 @@ def review(
         "phone_number": "010-1234-5678",
     }
 
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -23,7 +23,7 @@ def review(
         "rating": 4,
         "comment": "Good"
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
 
     res_json = res.json()
     assert res.status_code == 201
@@ -49,7 +49,7 @@ def another_review(
         "phone_number": "010-9876-5432",
     }
 
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -58,7 +58,7 @@ def another_review(
         "rating": 3,
         "comment": "Soso"
     }
-    res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
+    res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {another_user_access_token}"})
 
     res_json = res.json()
     assert res.status_code == 201
@@ -83,7 +83,7 @@ def reviews(
         "phone_number": "010-1234-5678",
     }
 
-    user_info = client.patch("/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
+    user_info = client.patch("/api/users/me", json=req, headers={"Authorization": f"Bearer {access_token}"}).json()
     assert user_info["address"] == req["address"]
     assert user_info["nickname"] == req["nickname"]
     assert user_info["phone_number"] == req["phone_number"]
@@ -95,7 +95,7 @@ def reviews(
             "rating": 5,
             "comment": "Great"
         }
-        res = client.post(f"/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
+        res = client.post(f"/api/items/{item['id']}/reviews", json=req, headers={"Authorization": f"Bearer {access_token}"})
         res_json = res.json()
         assert res.status_code == 201
         assert res_json["review_id"] is not None
