@@ -63,24 +63,3 @@ def orders(
 
         assert res.status_code == 201
     return order_list
-
-@pytest.fixture
-def reviews(
-    client: TestClient,
-    access_token: str,
-    items
-):
-    auth_header = {"Authorization": f"Bearer {access_token}"}
-    req = {
-        "nickname": "waffle",
-    }
-    res = client.patch("/api/users/me", headers=auth_header, json=req)
-    assert res.status_code == 200
-
-    req = {
-        "rating": 3,
-        "comment": "good"
-    }
-    res = client.post(f"/api/items/{items[0]["id"]}/reviews", headers=auth_header, json=req)
-    assert res.status_code == 201
-    

@@ -248,20 +248,3 @@ def test_get_me_orders(
     assert len(res_json) == 3
     for i in range(3):
         assert res_json[i]["order_id"] is not None
-
-# TEST GET /api/users/me/reviews
-def test_get_me_reviews(
-    client: TestClient,
-    access_token: str,
-    reviews
-):
-    auth_header = {"Authorization": f"Bearer {access_token}"}
-
-    res = client.get("/api/users/me/reviews", headers=auth_header)
-    res_json = res.json()
-
-    assert res.status_code == 200
-    assert len(res_json) == 1
-    assert res_json[0]["item_name"] == "item0"
-    assert res_json[0]["rating"] == 3
-    assert res_json[0]["comment"] == "good"

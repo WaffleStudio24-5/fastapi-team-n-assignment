@@ -7,15 +7,14 @@
 ## 진행 방식과 필수 범위
 
 - **3인 1조**로 와팡 서버를 구현합니다. 조별 저장소 하나에 협업한 결과를 제출합니다.
-- **필수:** 회원·상점·상품·주문·리뷰의 API 21개, ERD, SQLAlchemy 모델, MySQL 마이그레이션.
-- **선택:** 장바구니 모델과 API 4개. 필수 범위를 완성한 뒤 진행하며, 미구현해도 필수 과제 완료에 영향을 주지 않습니다.
+- **필수:** 회원·상점·상품·주문의 API 15개, ERD, SQLAlchemy 모델과 마이그레이션, EC2 배포, RDS MySQL, CI/CD.
 - 인증·회원가입 등의 기존 코드는 출발점입니다. 제공 코드에도 명세에 맞게 보완해야 할 부분이 있으며, 처음부터 모든 테스트가 통과하는 완성본이 아닙니다.
-- 배포는 이번 과제의 필수 범위에 포함하지 않습니다.
+- 선택 과제는 없습니다. 아래 API와 인프라 요구 사항을 모두 완료해야 합니다.
 
 ### 협업 방법
 
 1. 구현 전에 세 명이 ERD와 모델 관계를 함께 합의합니다.
-2. 기능별로 담당자가 모델·API·테스트 확인까지 맡습니다. 예시: A는 회원·상점, B는 상품·리뷰, C는 주문·내 주문 목록을 담당합니다. 내 리뷰 목록은 리뷰 담당자가 맡습니다.
+2. 주담당 예시: A는 상점·상품, B는 회원·주문, C는 EC2·RDS·CD를 맡습니다. 인프라 담당자도 회원 정보 조회 등 작은 API 하나를 맡고, 각 기능 담당자는 모델·API·테스트 확인까지 진행합니다. ERD 설계와 배포 확인은 함께 합니다.
 3. 각자 기능 PR을 작성하고, 다른 팀원의 PR을 리뷰합니다. 각자 담당한 구현을 설명할 수 있어야 합니다.
 4. 마이그레이션은 함께 통합하고, 마지막에는 상품 등록 → 주문 → 주문 조회 흐름을 검증합니다. 전체 기간의 마지막 20~30%는 통합과 수정에 남겨두는 것을 권장합니다.
 5. 제출 시 README에 역할 분담과 각자의 구현·리뷰 PR 링크를 기록합니다.
@@ -36,21 +35,18 @@ uv run uvicorn wapang.main:app --reload
 - `.env.local`의 인증 키는 실습용 예시입니다. 실제 서비스의 비밀번호나 키를 커밋하지 마세요.
 
 ```bash
-# 필수 테스트만 실행 (GitHub Actions도 동일한 범위)
+# 제공 테스트 실행 (GitHub Actions도 동일한 범위)
 ENV=test uv run pytest
-# 선택 과제 테스트
-ENV=test uv run pytest tests/carts
-# 선택 과제를 포함한 전체 테스트
-ENV=test uv run pytest tests
 ```
 
-테스트는 메모리 SQLite를 사용합니다. 테스트 통과와 별도로 빈 MySQL 데이터베이스에 `alembic upgrade head`가 성공하고 서버가 실행되는지 확인해야 합니다.
+테스트는 메모리 SQLite를 사용합니다. 테스트 통과와 별도로 RDS MySQL에 마이그레이션을 적용하고, EC2에서 실행한 API가 RDS에 데이터를 저장·조회하는지 확인해야 합니다.
 
 ## 과제 목표
 
 - ER 다이어그램을 활용하여 도메인에 적합한 데이터베이스 모델을 설계할 수 있다.
 - SQLAlchemy를 사용하여 데이터베이스를 다루고 API를 구현할 수 있다.
-- 복잡한 비즈니스 로직을 포함한 실제 서비스와 유사한 API를 개발할 수 있다.
+- 주문과 재고 처리를 포함한 API를 개발할 수 있다.
+- EC2와 RDS에 서비스를 배포하고, 테스트를 통과한 변경을 자동 배포할 수 있다.
 
 ## 준비 사항
 
@@ -77,8 +73,9 @@ ENV=test uv run pytest tests
 ### 1. 데이터베이스 모델 설계 (ER 다이어그램)
 기획자로부터 다음과 같은 요구 사항을 전달받았습니다.  
 주어진 요구 사항에 따라 데이터베이스 구조를 설계해봅시다.  
-수업 시간에 소개했듯이 [www.erdcloud.com](www.erdcloud.com)를 통해서 ER 다이어그램을 그려볼 수 있습니다. 
-완성된 ER 다이어그램은 **공개 상태**로 전환한 후 그 링크를 `erd_link.py`에 작성해주세요.
+ERD 작성 사이트나 도구에는 제한이 없습니다. 이미지·PDF 파일 또는 채점자가 접근 가능한 링크로 제출해주세요.
+ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이블의 PK·FK와 관계를 확인할 수 있어야 합니다.
+파일은 저장소에 포함하고, 파일 경로나 링크를 `erd_link.py`의 `ERD_LINK`에 작성해주세요.
 
 - 유저는 `id`, `email`, `hashed_password`, `nickname`, `address`, `phone_number` 을 가지고 있어야 합니다.
 - 유저는 최대 하나의 상점만 소유할 수 있습니다.
@@ -90,20 +87,10 @@ ENV=test uv run pytest tests
 - 주문은 `id`, `status`, `total_price`를 가지고 있어야 합니다.
 - 주문의 `status` 속성은 진행 상태에 따라 `CANCELED`, `ORDERED`, `COMPLETE` 중 하나의 상태를 가집니다.
 - 한 주문에는 여러 개의 상품이 포함될 수 있습니다.
-- 유저는 상품마다 최대 한 개의 리뷰를 남길 수 있습니다.
-- 리뷰는 `id`, `rating`, `comment` 를 가지고 있어야 합니다.
-- 리뷰의 `rating` 속성은 1부터 5까지의 정수 값만 가질 수 있습니다.
-- 상품은 여러 개의 리뷰를 가질 수 있습니다.
-아래 모델 요구 사항은 **선택 과제(장바구니)** 에만 적용합니다.
-
-- 유저는 장바구니를 하나 가지고 있습니다.
-- 장바구니는 여러 개의 상품을 담을 수 있습니다.
-- 장바구니에 담긴 상품의 수량을 숫자로 관리합니다.
-- 한 상품은 여러 개의 장바구니에 담길 수 있습니다.
 
 ### 2. 데이터베이스 구조 작성 및 마이그레이션
 
-과제 1에서 설계한 ER 다이어그램을 바탕으로 SQLAlchemy ORM 모델을 작성하고, 그 구조를 로컬 MySQL 데이터베이스에 반영(마이그레이션)해봅니다.  
+과제 1에서 설계한 ER 다이어그램을 바탕으로 SQLAlchemy ORM 모델을 작성하고, 그 구조를 MySQL 데이터베이스에 반영(마이그레이션)합니다. 로컬에서 개발한 뒤 배포 시 RDS MySQL에도 적용해야 합니다.
 
 #### SQLAlchemy ORM 작성
 `./wapang/app/auth/models.py`와 `./wapang/app/users/models.py`에 SQLAlchemy ORM 모델의 예시가 제공되어 있습니다.
@@ -118,7 +105,7 @@ ENV=test uv run pytest tests
 	- 각자의 로컬 DB 환경에서 테스트하실 수 있도록 `.env.local` 파일을 수정하시면 됩니다.  
 	- 수정하신 `.env.local` 파일을 commit하실 필요는 없습니다(사실 `.env` 파일을 git에 포함시키는 것은 권장되지 않습니다. 본 과제에서는 코드의 골격 제시를 위해 부득이하게 포함하였습니다).  
 	- `.env.test`는 채점 시 사용되므로 **건드리지 말아주세요.**  
-	- `.env.prod`는 추후 배포용 예시이며, 이번 과제에서는 설정하지 않아도 됩니다.
+	- `.env.prod`는 배포 환경 설정의 예시입니다. RDS 접속 정보와 인증 키는 GitHub Secrets 또는 EC2의 환경변수로 주입하고, 실제 값을 저장소에 커밋하지 마세요.
 - 세 파일 중 실제 서버 가동에 사용될 파일을 결정하는 방법은 직접 탐구해보시기 바랍니다!  
 
 ##### 마이그레이션하기
@@ -289,47 +276,6 @@ ENV=test uv run pytest tests
 					"order_id": "b1f2cc8c-6965-5bge-9ce5-91geggb32521",
 					"total_price": 25000,
 					"status": "COMPLETE"
-				}
-			]
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-
-##### 1-5) GET `/api/users/me/reviews` — 내 리뷰 목록 조회 (로그인 필요)
-
-- 로그인한 사용자가 작성한 모든 리뷰 목록을 조회합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 리뷰 목록 배열
-		- 예시
-			```json
-			[
-				{
-					"review_id": "rev123-uuid-4567-8901-234567890abc",
-					"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-					"item_name": "와플",
-					"comment": "맛있어요!",
-					"rating": 5
-				},
-				{
-					"review_id": "rev456-uuid-7890-1234-567890123def",
-					"item_id": "789c1422-9063-46b9-b999-8bf4a4f8e28d",
-					"item_name": "초콜릿",
-					"comment": "달콤하고 좋네요.",
-					"rating": 5
 				}
 			]
 			```
@@ -676,7 +622,6 @@ ENV=test uv run pytest tests
 ##### 3-4) DELETE `/api/items/{item_id}` — 상품 삭제 (로그인 필요)
 
 - 로그인한 사용자가 자신의 상점의 상품을 삭제합니다. 재고를 0으로 만드는 것과 달리 상품을 완전히 삭제하여 목록에서 제거합니다.
-- 상품이 삭제되어도 해당 상품에 작성된 리뷰는 독립적으로 유지되며 삭제되지 않습니다.
 - 상품 삭제 요청이 들어오면 다음의 사항이 검증돼야 합니다.
 	- 상품이 존재하는지 확인해야 합니다.
 	- 로그인한 사용자가 해당 상품의 상점 소유자인지 확인해야 합니다.
@@ -701,122 +646,6 @@ ENV=test uv run pytest tests
 		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
 		|상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
 		|상품의 소유자가 아닌 경우|403|ERR_014|NOT YOUR ITEM|
-
-##### 3-5) POST `/api/items/{item_id}/reviews` — 리뷰 작성 (로그인 필요)
-
-- 로그인한 사용자가 특정 상품에 대한 리뷰를 작성합니다. 한 사용자는 각 상품에 대해 최대 하나의 리뷰만 작성할 수 있습니다.
-- 리뷰 작성 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 필요한 필드가 모두 있어야 합니다.
-	- `rating`: 1 이상 5 이하의 정수이어야 합니다.
-	- `comment`: 500자 이하의 문자열이어야 합니다.
-	- 상품이 존재하는지 확인해야 합니다.
-	- 사용자가 `nickname`을 설정했는지 확인해야 합니다. `nickname`이 없으면 리뷰를 작성할 수 없습니다.
-	- 유저가 해당 상품에 대해 이미 리뷰를 작성한 경우, 리뷰를 추가할 수 없습니다.
-- 각 리뷰에는 고유 식별자로 `id`(str)가 부여됩니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-	- URL 파라미터: `item_id` (str)
-	- 본문 예시
-		```json
-		{
-			"rating": 5,
-			"comment": "너무 좋아요!"
-		}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 201
-		- 본문: 생성된 리뷰 정보
-		- 예시
-			```json
-			{
-				"review_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-				"item_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-				"writer_nickname": "와플이",
-				"is_writer": true,
-				"rating": 5,
-				"comment": "너무 좋아요!"
-			}
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-		|요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
-		|사용자가 nickname을 설정하지 않은 경우|422|ERR_015|NICKNAME NOT SET|
-		|이미 해당 상품에 리뷰를 작성한 경우|409|ERR_016|REVIEW ALREADY EXISTS|
-
-##### 3-6) GET `/api/items/{item_id}/reviews` — 상품 리뷰 조회 (로그인 선택)
-
-- 특정 상품에 대한 모든 리뷰 목록을 조회합니다.
-- 로그인한 경우 `is_writer` 필드가 포함되며, 비로그인 상태에서는 `is_writer` 필드가 생략됩니다.
-- 상품 리뷰 조회 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 상품이 존재하는지 확인해야 합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 선택적으로 포함될 수 있음
-		```
-		Authorization: Bearer {access_token}
-		```
-	- URL 파라미터: `item_id` (정수)
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 리뷰 목록 배열
-		- 로그인한 경우 예시
-			```json
-			[
-				{
-					"review_id": "10abb358-2815-4540-bcd4-5cc81f756b4d",
-					"writer_nickname": "와플이",
-					"is_writer": true,
-					"rating": 5,
-					"comment": "너무 좋아요!"
-				},
-				{
-					"review_id": "eaefbdda-6db4-41f6-aef2-a9c87adbd03d",
-					"writer_nickname": "초코",
-					"is_writer": false,
-					"rating": 4,
-					"comment": "괜찮아요."
-				}
-			]
-			```
-		- 비로그인 상태 예시
-			```json
-			[
-				{
-					"review_id": "10abb358-2815-4540-bcd4-5cc81f756b4d",
-					"writer_nickname": "와플이",
-					"rating": 5,
-					"comment": "너무 좋아요!"
-				},
-				{
-					"review_id": "eaefbdda-6db4-41f6-aef2-a9c87adbd03d",
-					"writer_nickname": "초코",
-					"rating": 4,
-					"comment": "괜찮아요."
-				}
-			]
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
 
 #### 4. `/api/orders` 엔드포인트
 
@@ -1025,373 +854,38 @@ ENV=test uv run pytest tests
 		|이미 취소되었거나 완료된 주문을 변경하려고 할 경우|409|ERR_021|INVALID ORDER STATUS|
 		|다른 유저의 주문을 변경하려고 할 경우|403|ERR_020|NOT YOUR ORDER|
 
-#### 5. `/api/reviews` 엔드포인트
+### 4. EC2·RDS 및 CI/CD
 
-##### 5-1) GET `/api/reviews/{review_id}` — 리뷰 조회 (로그인 선택)
+#### EC2 배포와 자동 배포(CD)
 
-- 지정된 ID의 리뷰 정보를 조회합니다.
-- 로그인한 경우 `is_writer` 필드가 포함되며, 비로그인 상태에서는 `is_writer` 필드가 생략됩니다.
-- 리뷰 조회 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 리뷰가 존재하는지 확인해야 합니다.
+- API 서버를 EC2에서 실행하고, 제출한 주소로 채점자가 API에 접근할 수 있어야 합니다.
+- `main`에 반영된 변경은 해당 커밋의 CI 테스트를 통과한 뒤 EC2에 자동 배포되어야 합니다. 테스트 실패 시 배포되면 안 됩니다.
+- CD는 `.github/workflows/cd.yaml`의 **빈 파일**만 제공합니다. 학생이 트리거, 테스트 성공 조건, 배포 작업을 작성해야 합니다. 빈 파일은 완성된 워크플로우가 아니며, 구현 전에는 배포가 실행되지 않습니다.
+- 수업에서 다룬 배포 방식을 기준으로 구성하고, 필요한 Secrets 이름과 설정 절차를 README에 기록합니다. 비밀값 자체는 기록하지 않습니다.
+- 배포 시 필요한 Alembic 마이그레이션을 적용하고, 배포 후 API가 정상 동작하는지 확인합니다.
 
-- **요청**
-	- 헤더에 다음 필드가 선택적으로 포함될 수 있음
-		```
-		Authorization: Bearer {access_token}
-		```
-	- URL 파라미터: `review_id` (str)
+#### CI 테스트
 
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 리뷰 정보
-		- 로그인한 경우 예시
-			```json
-			{
-				"review_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-				"item_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-				"writer_nickname": "와플이",
-				"is_writer": true,
-				"rating": 5,
-				"comment": "너무 좋아요!"
-			}
-			```
-		- 비로그인 상태 예시
-			```json
-			{
-				"review_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-				"item_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-				"writer_nickname": "와플이",
-				"rating": 5,
-				"comment": "너무 좋아요!"
-			}
-			```
+- `.github/workflows/classroom.yaml`에 제공된 테스트 워크플로우를 사용합니다. PR과 `main` 푸시에서 `ENV=test uv run pytest`를 실행합니다.
+- 테스트를 제거하거나 건너뛰어 통과시키지 않고, 구현을 완료해 제공 테스트를 모두 통과해야 합니다.
+- CI용 데이터베이스는 기존 메모리 SQLite를 사용합니다. CI에 RDS 접속 정보를 넣을 필요는 없습니다.
 
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|리뷰가 존재하지 않는 경우|404|ERR_022|REVIEW NOT FOUND|
+#### RDS MySQL
 
-
-##### 5-2) PATCH `/api/reviews/{review_id}` — 리뷰 수정 (로그인 필요)
-
-- 로그인한 사용자가 자신이 작성한 리뷰를 수정합니다.
-- 리뷰 수정 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 리뷰가 존재하는지 확인해야 합니다.
-	- 해당 리뷰가 로그인한 유저의 리뷰인지 확인해야 합니다.
-	- 요청 본문에 포함된 필드가 올바른지 확인해야 합니다. 또한 적어도 하나 이상의 필드가 포함되어야 합니다.
-		- `rating`: 1 이상 5 이하의 정수이어야 합니다.
-		- `comment`: 500자 이하의 문자열이어야 합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-	- URL 파라미터: `review_id` (str)
-	- 본문 예시
-		```json
-		{
-			"rating": 4,
-			"comment": "괜찮아요!"
-		}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 수정된 리뷰 정보
-		- 예시
-			```json
-			{
-				"review_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-				"item_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-				"writer_nickname": "와플이",
-				"is_writer": true,
-				"rating": 4,
-				"comment": "괜찮아요!"
-			}
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-		|요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|리뷰가 존재하지 않는 경우|404|ERR_022|REVIEW NOT FOUND|
-		|다른 유저의 리뷰를 수정하려고 할 경우|403|ERR_023|NOT YOUR REVIEW|
-
-##### 5-3) DELETE `/api/reviews/{review_id}` — 리뷰 삭제 (로그인 필요)
-
-- 로그인한 사용자가 자신이 작성한 리뷰를 삭제합니다.
-- 리뷰 삭제 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 리뷰가 존재하는지 확인해야 합니다.
-	- 해당 리뷰가 로그인한 유저의 리뷰인지 확인해야 합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-	- URL 파라미터: `review_id` (str)
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 204
-		- 본문: 없음
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|리뷰가 존재하지 않는 경우|404|ERR_022|REVIEW NOT FOUND|
-		|다른 유저의 리뷰를 삭제하려고 할 경우|403|ERR_023|NOT YOUR REVIEW|
-
-### 선택 과제: 장바구니
-
-아래 4개 API와 관련 모델은 선택 구현입니다. 필수 21개 API 및 기본 테스트에는 포함되지 않습니다.
-
-#### 6. `/api/carts` 엔드포인트  
-
-##### 6-1) PATCH `/api/carts` — 장바구니 상품 추가/수정/삭제 (로그인 필요)
-
-- 로그인한 사용자의 장바구니에 상품을 추가하거나 수정합니다. 이미 장바구니에 있는 상품의 경우 수량을 업데이트하고, 없는 상품의 경우 새로 추가합니다.
-- `quantity`가 0인 경우 해당 상품을 장바구니에서 제거합니다.
-- 응답에는 상점별로 그룹화된 `details` 배열이 포함되며, 각 상점에는 상점 정보(`store_id`, `store_name`), 배송비(`delivery_fee`), 해당 상점 총 결제금액(`store_total_price`), 그리고 상품 목록(`items`)이 포함됩니다. 전체 결제 금액은 `total_price`로 제공됩니다.
-- 장바구니 상품 추가/수정/삭제 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 필요한 필드가 모두 있어야 합니다.
-	- `item_id`: 존재하는 상품이어야 합니다.
-	- `quantity`: 0 이상의 정수이어야 합니다. (0인 경우 해당 상품 삭제)
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-	- 본문 예시 (상품 추가/수정)
-		```json
-		{
-			"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-			"quantity": 2
-		}
-		```
-	- 본문 예시 (상품 삭제)
-		```json
-		{
-			"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-			"quantity": 0
-		}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 업데이트된 장바구니 정보
-		- 장바구니가 비어있는 경우 `details`는 빈 배열이고, `total_price`는 0으로 반환됩니다.
-		- 예시
-			```json
-			{
-				"details": [
-					{
-						"store_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-						"store_name": "와플 스토어",
-						"delivery_fee": 3000,
-						"store_total_price": 23000,
-						"items": [
-							{
-								"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-								"item_name": "와플",
-								"price": 10000,
-								"quantity": 2,
-								"subtotal": 20000
-							}
-						]
-					}
-				],
-				"total_price": 23000
-			}
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-		|요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
-
-##### 6-2) GET `/api/carts` — 장바구니 조회 (로그인 필요)
-
-- 로그인한 사용자의 장바구니 내용을 조회합니다.
-- 응답에는 상점별로 그룹화된 `details` 배열이 포함되며, 각 상점에는 상점 정보(`store_id`, `store_name`), 배송비(`delivery_fee`), 해당 상점 총 결제금액(`store_total_price`), 그리고 상품 목록(`items`)이 포함됩니다. 전체 결제 금액은 `total_price`로 제공됩니다.
-- 빈 장바구니인 경우 `details`는 빈 배열이고, `total_price`는 0으로 반환됩니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 200
-		- 본문: 장바구니 정보
-		- 예시
-			```json
-			{
-				"details": [
-					{
-						"store_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-						"store_name": "와플 스토어",
-						"delivery_fee": 3000,
-						"store_total_price": 23000,
-						"items": [
-							{
-								"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-								"item_name": "와플",
-								"price": 10000,
-								"quantity": 2,
-								"subtotal": 20000
-							}
-						]
-					},
-					{
-						"store_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-						"store_name": "초콜릿 스토어",
-						"delivery_fee": 3000,
-						"store_total_price": 18000,
-						"items": [
-							{
-								"item_id": "789c1422-9063-46b9-b999-8bf4a4f8e28d",
-								"item_name": "초콜릿",
-								"price": 15000,
-								"quantity": 1,
-								"subtotal": 15000
-							}
-						]
-					}
-				],
-				"total_price": 41000
-			}
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-
-##### 6-3) DELETE `/api/carts` — 장바구니 전체 비우기 (로그인 필요)
-
-- 장바구니의 모든 상품을 제거합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 204
-		- 본문: 없음
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-
-##### 6-4) POST `/api/carts/checkout` — 장바구니에서 주문 생성 (로그인 필요)
-
-- 현재 장바구니의 모든 상품으로 주문을 생성하고 장바구니를 비웁니다.
-- 주문 생성 요청이 들어오면 다음의 사항이 검증돼야 합니다.
-	- 장바구니가 비어있지 않은지 확인해야 합니다.
-	- 모든 상품의 재고가 충분한지 확인해야 합니다.
-
-- **요청**
-	- 헤더에 다음 필드가 포함됨
-		```
-		Authorization: Bearer {access_token}
-		```
-
-- **응답**
-	- **성공 응답**
-		- 상태 코드: 201
-		- 본문: 생성된 주문 정보
-		- 예시
-			```json
-			{
-				"order_id": "a0debb7b-5854-4afd-8bd4-80fdffa21410",
-				"details": [
-					{
-						"store_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-						"store_name": "와플 스토어",
-						"delivery_fee": 3000,
-						"store_total_price": 23000,
-						"items": [
-							{
-								"item_id": "4a40d8f9-6d90-4189-8f93-de0d4a89d6cf",
-								"item_name": "와플",
-								"price": 10000,
-								"quantity": 2,
-								"subtotal": 20000
-							}
-						]
-					},
-					{
-						"store_id": "b8e7f3a2-1c4d-5e6f-9012-345678901234",
-						"store_name": "초콜릿 스토어",
-						"delivery_fee": 3000,
-						"store_total_price": 18000,
-						"items": [
-							{
-								"item_id": "789c1422-9063-46b9-b999-8bf4a4f8e28d",
-								"item_name": "초콜릿",
-								"price": 15000,
-								"quantity": 1,
-								"subtotal": 15000
-							}
-						]
-					}
-				],
-				"total_price": 41000,
-				"status": "ORDERED"
-			}
-			```
-
-	- **실패 응답**
-		|상황|상태 코드|ERROR_CODE|ERROR_MSG|
-		|---|---|---|---|
-		|Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-		|Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-		|토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-		|재고가 부족한 경우|409|ERR_017|NOT ENOUGH STOCK|
-		|장바구니가 비어있는 경우|422|ERR_024|EMPTY ITEM LIST|
+- EC2의 API 서버는 RDS MySQL을 사용해야 합니다. 로컬 DB 또는 EC2 내부 DB만 사용한 배포는 완료로 인정하지 않습니다.
+- RDS에 Alembic 마이그레이션을 적용하고, EC2의 API를 통해 회원·상점·상품·주문 데이터가 저장·조회되는지 확인합니다.
+- RDS의 DB 포트 접근은 EC2 보안 그룹 등 필요한 출처로 제한합니다. DB 비밀번호·SSH 개인키·인증 키를 저장소에 올리지 않습니다.
 
 ## 제출 방법
 
-### 1번 과제
-- [ERDCloud](www.erdcloud.com)에서 그린 ER 다이어그램을 **공개 상태**로 전환한 후 그 링크를 `erd_link.py`에 작성해주세요.
+조별 저장소에 아래 결과를 정리해 제출합니다.
 
-### 2번 과제
-- 프로젝트 루트 디렉토리에서 `uv run alembic upgrade head` 명령어를 실행했을 때 DB 스키마가 반영될 수 있도록 `wapang/database/alembic/versions` 디렉토리에 마이그레이션 스크립트가 존재하는 상태여야 합니다.
-
-### 3번 과제
-- 완성된 코드는 프로젝트 루트 디렉토리에서 `uv run uvicorn wapang.main:app` 명령어 실행으로 서버가 가동되어야 하며, 필수 테스트(`ENV=test uv run pytest`)를 모두 통과해야 합니다. 장바구니 테스트는 선택 과제를 구현한 경우에만 확인합니다.
-
-- 팀원이 모두 조별 저장소에 접근할 수 있는지 확인하고, 제출 시 저장소 링크·공개 ERD 링크·역할 분담·구현 및 리뷰 PR 링크를 함께 제출합니다.
+1. **구현 코드와 테스트:** API 15개를 완성하고 `ENV=test uv run pytest`를 통과합니다. `uv run uvicorn wapang.main:app`으로 서버가 실행되어야 합니다.
+2. **ERD:** 사이트·도구 제한 없이 이미지·PDF 또는 채점자가 접근 가능한 링크를 제출합니다. 파일은 저장소에 넣고 `erd_link.py`의 `ERD_LINK`에 저장소 기준 파일 경로 또는 링크를 작성합니다.
+3. **마이그레이션:** `wapang/database/alembic/versions`에 스크립트를 포함합니다. 빈 MySQL DB에 `uv run alembic upgrade head`를 적용할 수 있어야 하며, 배포용 RDS에도 반영되어야 합니다.
+4. **EC2·RDS:** README에 EC2 API 기본 주소와 문서(`/docs`) 주소, 실행·환경 설정 방법, RDS 연결 및 저장·조회 확인 결과를 기록합니다. 비밀값은 제출하지 않습니다.
+5. **CI/CD:** 완성된 CD 워크플로우와 함께, 같은 커밋에 대한 테스트 성공 및 자동 배포 성공 실행 링크를 README에 기록합니다. 배포된 API로 상품 등록 → 주문 → 주문 조회 흐름을 확인합니다.
+6. **협업 기록:** README에 역할 분담, 각자의 구현 PR과 코드 리뷰 PR 링크를 기록합니다. ERD·배포 확인은 팀원 모두 설명할 수 있어야 합니다.
 
 ## 원본
 

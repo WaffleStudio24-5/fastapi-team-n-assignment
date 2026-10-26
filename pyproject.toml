@@ -16,4 +16,4 @@ dependencies = [
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/users", "tests/stores", "tests/items", "tests/orders", "tests/reviews"]
+testpaths = ["tests/users", "tests/stores", "tests/items", "tests/orders"]

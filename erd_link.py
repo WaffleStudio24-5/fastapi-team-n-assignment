@@ -1,1 +1,1 @@
-ERD_LINK = "https://foo.bar" # TODO: 여기에 ER 다이어그램 링크를 작성해주세요.
+ERD_LINK = ""  # TODO: ERD 이미지·PDF의 저장소 기준 경로 또는 접근 가능한 링크
