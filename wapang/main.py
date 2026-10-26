@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 
 from wapang.api import api_router
+from wapang.common.source_hash import get_source_hash
 from wapang.common.exceptions import (
     WapangException,
     MissingRequiredFieldException,
@@ -12,6 +13,11 @@ from wapang.common.exceptions import (
 app = FastAPI()
 
 app.include_router(api_router, prefix="/api")
+
+
+@app.get("/health", include_in_schema=False)
+def health():
+    return {"status": "ok", "hash": get_source_hash()}
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
