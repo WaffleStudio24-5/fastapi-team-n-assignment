@@ -15,8 +15,10 @@ class DatabaseManager:
         )
         self.session_factory = sessionmaker(bind=self.engine, expire_on_commit=False)
 
+database_manager = DatabaseManager()
+
 def get_db_session() -> Generator[Session, Any, None]:
-    session = DatabaseManager().session_factory()
+    session = database_manager.session_factory()
     try:
         yield session
         session.commit()

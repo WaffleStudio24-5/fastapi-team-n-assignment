@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Annotated
+from uuid import uuid4
 
 from fastapi import Depends, Header
 import argon2
@@ -25,6 +26,7 @@ def issue_token(user_id: str, lifespan_minutes: int, secret: str) -> str:
 	header = {'alg': 'HS256'}
 	payload = {
 		'sub': user_id,
+		'jti': str(uuid4()),
 		'exp': int((datetime.now() + timedelta(minutes=lifespan_minutes)).timestamp())
 	}
 	return str(jwt.encode(header, payload, key=secret), 'utf-8')

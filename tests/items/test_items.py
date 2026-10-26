@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 
 def test_create_item(
@@ -243,14 +244,17 @@ def test_patch_item_of_another_store(
     assert res.json()["error_code"] == "ERR_014"
     assert res.json()["error_msg"] == "NOT YOUR ITEM"
 
+@pytest.mark.parametrize("min_price", [2500, 7000])
 def test_get_items(
     client: TestClient,
     items: dict,
     store: dict,
+    item_2: dict,
+    min_price: int,
 ):
     query_params = {
         "store_id": store["id"],
-        "min_price": 5000,
+        "min_price": min_price,
         "max_price": 9000,
         "in_stock": True,
     }
@@ -258,6 +262,13 @@ def test_get_items(
     res = client.get("/api/items", params=query_params)
     res_json = res.json()
     assert res.status_code == 200
+    expected_ids = {
+        item["id"] for item in items
+        if query_params["min_price"] <= item["price"] <= query_params["max_price"]
+        and item["stock"] > 0
+    }
+    assert len(res_json) == len(expected_ids)
+    assert {item["id"] for item in res_json} == expected_ids
     for item in res_json:
         assert item["price"] >= query_params["min_price"]
         assert item["price"] <= query_params["max_price"]
@@ -314,12 +325,15 @@ def test_get_store_items(
     client: TestClient,
     store: dict,
     items: dict,
+    item_2: dict,
 ):
     store_id = store["id"]
     res = client.get(f"/api/stores/{store_id}/items")
     res_json = res.json()
     assert res.status_code == 200
     item_ids = {item['id'] for item in items}
+    assert len(res_json) == len(item_ids)
+    assert {item['id'] for item in res_json} == item_ids
     for item in res_json:
         assert item['id'] in item_ids
         assert item['item_name'] in {i['item_name'] for i in items}

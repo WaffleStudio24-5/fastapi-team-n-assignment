@@ -50,6 +50,12 @@ def test_create_order(
         assert detail["store_total_price"] == store_total_price
         total_price += store_total_price
     assert res_json["total_price"] == total_price
+    response = client.get("/api/items")
+    assert response.status_code == 200
+    stock = {item["id"]: item["stock"] for item in response.json()}
+    quantities = {item["item_id"]: item["quantity"] for item in req}
+    for item in order_items:
+        assert stock[item["id"]] == item["stock"] - quantities[item["id"]]
 
 def test_create_order_with_nonexistent_item(
     client: TestClient,
@@ -72,22 +78,55 @@ def test_create_order_with_nonexistent_item(
     res_json = res.json()
     assert res_json["error_code"] == "ERR_013"
     assert res_json["error_msg"] == "ITEM NOT FOUND"
+    response = client.get("/api/items")
+    assert response.status_code == 200
+    assert {item["id"]: item["stock"] for item in response.json()} == {
+        item["id"]: item["stock"] for item in order_items
+    }
+    response = client.get("/api/users/me/orders", headers={"Authorization": f"Bearer {access_token}"})
+    assert response.status_code == 200
+    assert response.json() == []
 
 def test_create_order_with_not_enough_stock(
     client: TestClient,
     access_token: str,
+    order_items: list[dict],
+):
+    req = [
+        {"item_id": order_items[0]["id"], "quantity": 1},
+        {"item_id": order_items[1]["id"], "quantity": order_items[1]["stock"] + 1},
+    ]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    res = client.post("/api/orders", json={"items": req}, headers=headers)
+    assert res.status_code == 409
+    assert res.json() == {"error_code": "ERR_017", "error_msg": "NOT ENOUGH STOCK"}
+    response = client.get("/api/items")
+    assert response.status_code == 200
+    assert {item["id"]: item["stock"] for item in response.json()} == {
+        item["id"]: item["stock"] for item in order_items
+    }
+    response = client.get("/api/users/me/orders", headers=headers)
+    assert response.status_code == 200
+    assert response.json() == []
+
+
+def test_create_order_with_duplicate_items(
+    client: TestClient,
+    access_token: str,
     item: dict,
 ):
-    req = [{
-        "item_id": item["id"],
-        "quantity": item["stock"] + 10
-    }]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    req = [{"item_id": item["id"], "quantity": 1}] * 2
+    res = client.post("/api/orders", json={"items": req}, headers=headers)
+    assert res.status_code == 400
+    assert res.json() == {"error_code": "ERR_003", "error_msg": "INVALID FIELD FORMAT"}
+    response = client.get("/api/items")
+    assert response.status_code == 200
+    assert {row["id"]: row["stock"] for row in response.json()} == {item["id"]: item["stock"]}
+    response = client.get("/api/users/me/orders", headers=headers)
+    assert response.status_code == 200
+    assert response.json() == []
 
-    res = client.post("/api/orders", json={"items": req}, headers={"Authorization": f"Bearer {access_token}"})
-    assert res.status_code == 409
-    res_json = res.json()
-    assert res_json["error_code"] == "ERR_017"
-    assert res_json["error_msg"] == "NOT ENOUGH STOCK"
 
 def test_create_order_with_no_items(
     client: TestClient,

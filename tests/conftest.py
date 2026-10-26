@@ -45,29 +45,20 @@ def db_engine(set_test_env) -> Iterable[sqlalchemy.Engine]:
 
 @pytest.fixture(scope="function")
 def db_session(db_engine: sqlalchemy.Engine) -> Iterable[orm.Session]:
-    connection = db_engine.connect()
-    transaction = connection.begin_nested()
-
-    session_maker = orm.sessionmaker(
-        connection,
-        expire_on_commit=True,
-    )
-
-    session = session_maker()
-
-    try:
+    with orm.Session(db_engine) as session:
         yield session
-    finally:
-        session.close()
-        transaction.rollback()
-        connection.close()
 
 
 @pytest.fixture
 def client(db_session: orm.Session) -> Iterable[TestClient]:
 
     def override_get_db_session():
-        return db_session
+        try:
+            yield db_session
+            db_session.commit()
+        except Exception:
+            db_session.rollback()
+            raise
 
     app.dependency_overrides[get_db_session] = override_get_db_session
     client = TestClient(app)

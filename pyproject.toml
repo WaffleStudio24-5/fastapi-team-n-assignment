@@ -13,7 +13,8 @@ dependencies = [
     "pymysql>=1.1.2",
     "pytest>=8.4.2",
     "sqlalchemy>=2.0.43",
+    "uuid6>=2025.0.1",
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests/users", "tests/stores", "tests/items", "tests/orders"]
+testpaths = ["tests/users", "tests/stores", "tests/items", "tests/orders", "tests/auth", "tests/starter"]

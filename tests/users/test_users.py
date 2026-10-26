@@ -170,6 +170,8 @@ def test_patch_me(
     access_token: str
 ):
     auth_header = {"Authorization": f"Bearer {access_token}"}
+    original = client.get("/api/users/me", headers=auth_header)
+    assert original.status_code == 200
     req = {
         "nickname": "waffle",
         "address": "Seoul"
@@ -181,6 +183,7 @@ def test_patch_me(
     assert res.status_code == 200
     assert res_json["nickname"] == req["nickname"]
     assert res_json["address"] == req["address"]
+    assert res_json["email"] == original.json()["email"]
 
 def test_patch_me_random(
     client: TestClient,

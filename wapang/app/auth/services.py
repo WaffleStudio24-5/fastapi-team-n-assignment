@@ -56,11 +56,11 @@ class AuthService:
             raise InvalidTokenException()
         exp_datetime = datetime.fromtimestamp(exp)
 
-        self.block_refresh_token(token, exp_datetime)
-
         user_id = claims.get("sub", None)
         if user_id is None:
             raise InvalidTokenException()
+
+        self.block_refresh_token(token, exp_datetime)
         access_token = issue_token(user_id, SHORT_SESSION_LIFESPAN, ACCESS_TOKEN_SECRET)
         refresh_token = issue_token(user_id, LONG_SESSION_LIFESPAN, REFRESH_TOKEN_SECRET)
         return access_token, refresh_token
