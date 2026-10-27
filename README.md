@@ -79,7 +79,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 ### 2. 데이터베이스 구조 작성 및 마이그레이션
 
-과제 1에서 설계한 ER 다이어그램을 바탕으로 SQLAlchemy ORM 모델을 작성하고, 그 구조를 MySQL 데이터베이스에 반영(마이그레이션)합니다. 로컬에서 개발한 뒤 배포 시 RDS MySQL에도 적용해야 합니다.
+1에서 설계한 ER 다이어그램을 바탕으로 SQLAlchemy ORM 모델을 작성하고, 그 구조를 MySQL 데이터베이스에 반영(마이그레이션)합니다. 로컬에서 개발한 뒤 배포 시 RDS MySQL에도 적용해야 합니다.
 
 #### SQLAlchemy ORM 작성
 
@@ -96,7 +96,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 - 참고
   - 제공된 Compose를 사용하면 `.env.local`을 수정할 필요가 없습니다. 별도 MySQL을 사용하는 경우에만 접속 정보를 수정해주세요.
   - 수정하신 `.env.local` 파일을 commit하실 필요는 없습니다(사실 `.env` 파일을 git에 포함시키는 것은 권장되지 않습니다. 본 과제에서는 코드의 골격 제시를 위해 부득이하게 포함하였습니다).
-  - `.env.test`는 채점 시 사용되므로 **건드리지 말아주세요.**
+  - `.env.test`는 채점 시 사용되므로 **수정하지 말아주세요.**
   - `.env.prod`는 배포 환경 설정의 예시입니다. RDS 접속 정보와 인증 키는 GitHub Secrets 또는 EC2의 환경변수로 주입하고, 실제 값을 저장소에 커밋하지 마세요.
 - 세 파일 중 실제 서버 가동에 사용될 파일을 결정하는 방법은 직접 탐구해보시기 바랍니다!
 
@@ -128,6 +128,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 본문 예시
+
     ```json
     {
     	"email": "waffle@example.com",
@@ -140,6 +141,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 201
     - 본문: 생성된 사용자 정보 (비밀번호 제외)
     - 예시
+
     ```json
     {
     	"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -149,14 +151,17 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     	"phone_number": null
     }
     ```
+
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |같은 이메일의 사용자가 이미 등록되어 있는 경우|409|ERR_004|EMAIL ALREADY EXISTS|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG               |
+    | ---------------------------------------------- | --------- | ---------- | ----------------------- |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT    |
+    | 같은 이메일의 사용자가 이미 등록되어 있는 경우 | 409       | ERR_004    | EMAIL ALREADY EXISTS    |
     - 예시  
       상태 코드 400과 함께 다음의 본문(application/json)이 반환됨.
+
       ```json
       {
       	"error_code": "ERR_002",
@@ -171,6 +176,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
@@ -180,6 +186,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 사용자 정보 (비밀번호 제외)
     - 예시
+
       ```json
       {
       	"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -191,11 +198,12 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
 
 ##### 1-3) PATCH `/api/users/me` — 프로필 수정 (로그인 필요)
 
@@ -207,10 +215,13 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - 본문 예시
+
     ```json
     {
     	"address": "서울시 강남구"
@@ -222,6 +233,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 수정된 사용자 정보
     - 예시
+
       ```json
       {
       	"id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
@@ -233,13 +245,14 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
 
 ##### 1-4) GET `/api/users/me/orders` — 내 주문 목록 조회 (로그인 필요)
 
@@ -247,6 +260,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
@@ -256,6 +270,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 주문 목록 배열
     - 예시
+
       ```json
       [
       	{
@@ -272,11 +287,12 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
 
 #### 2. `/api/stores` 엔드포인트
 
@@ -295,10 +311,13 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - 본문 예시
+
     ```json
     {
     	"store_name": "store1",
@@ -314,6 +333,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 201
     - 본문: 생성된 상점 정보
     - 예시
+
       ```json
       {
       	"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
@@ -326,15 +346,16 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |이미 상점을 소유하고 있는 경우|409|ERR_008|STORE ALREADY EXISTS|
-    |상점명/이메일/전화번호가 중복되는 경우|409|ERR_009|STORE INFO CONFLICT|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 이미 상점을 소유하고 있는 경우                 | 409       | ERR_008    | STORE ALREADY EXISTS     |
+    | 상점명/이메일/전화번호가 중복되는 경우         | 409       | ERR_009    | STORE INFO CONFLICT      |
 
 ##### 2-2) PATCH `/api/stores/{store_id}` — 상점 정보 수정 (로그인 필요)
 
@@ -352,11 +373,14 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - URL 파라미터: `store_id` (str)
   - 본문 예시
+
     ```json
     {
     	"delivery_fee": 5000
@@ -368,6 +392,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 수정된 상점 정보
     - 예시
+
       ```json
       {
       	"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
@@ -380,17 +405,18 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |상점명/이메일/전화번호가 중복되는 경우|409|ERR_009|STORE INFO CONFLICT|
-    |상점이 존재하지 않는 경우|404|ERR_010|STORE NOT FOUND|
-    |상점을 소유하지 않은 경우|403|ERR_011|NO STORE OWNED|
-    |다른 상점을 수정하려는 경우|403|ERR_012|NOT YOUR STORE|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 상점명/이메일/전화번호가 중복되는 경우         | 409       | ERR_009    | STORE INFO CONFLICT      |
+    | 상점이 존재하지 않는 경우                      | 404       | ERR_010    | STORE NOT FOUND          |
+    | 상점을 소유하지 않은 경우                      | 403       | ERR_011    | NO STORE OWNED           |
+    | 다른 상점을 수정하려는 경우                    | 403       | ERR_012    | NOT YOUR STORE           |
 
 ##### 2-3) GET `/api/stores/{store_id}` — 상점 조회
 
@@ -406,6 +432,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 상점 정보
     - 예시
+
       ```json
       {
       	"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
@@ -418,9 +445,10 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |상점이 존재하지 않는 경우|404|ERR_010|STORE NOT FOUND|
+
+    | 상황                      | 상태 코드 | ERROR_CODE | ERROR_MSG       |
+    | ------------------------- | --------- | ---------- | --------------- |
+    | 상점이 존재하지 않는 경우 | 404       | ERR_010    | STORE NOT FOUND |
 
 ##### 2-4) GET `/api/stores/{store_id}/items` — 상점의 상품 목록 조회
 
@@ -434,12 +462,13 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 상품 목록 배열
     - 예시
+
       ```json
       [
       	{
       		"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
       		"item_name": "와플",
-      		"price": 10000,
+          "price": 10000,
       		"stock": 15
       	},
       	{
@@ -452,9 +481,10 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |상점이 존재하지 않는 경우|404|ERR_010|STORE NOT FOUND|
+
+    | 상황                      | 상태 코드 | ERROR_CODE | ERROR_MSG       |
+    | ------------------------- | --------- | ---------- | --------------- |
+    | 상점이 존재하지 않는 경우 | 404       | ERR_010    | STORE NOT FOUND |
 
 #### 3. `/api/items` 엔드포인트
 
@@ -471,10 +501,13 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - 본문 예시
+
     ```json
     {
     	"item_name": "item1",
@@ -488,6 +521,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 201
     - 본문: 생성된 상품 정보
     - 예시
+
       ```json
       {
       	"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
@@ -498,14 +532,15 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |상점을 소유하지 않은 경우|403|ERR_011|NO STORE OWNED|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 상점을 소유하지 않은 경우                      | 403       | ERR_011    | NO STORE OWNED           |
 
 ##### 3-2) PATCH `/api/items/{item_id}` — 상품 수정 (로그인 필요)
 
@@ -521,11 +556,14 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - URL 파라미터: `item_id` (str)
   - 본문 예시
+
     ```json
     {
     	"item_name": "item1",
@@ -539,6 +577,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 수정된 상품 정보
     - 예시
+
       ```json
       {
       	"id": "6b5e1a9d-5f13-4cf0-b5f2-fde832c10534",
@@ -549,16 +588,17 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |상점을 소유하지 않은 경우|403|ERR_011|NO STORE OWNED|
-    |상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
-    |다른 상점의 상품을 수정하려는 경우|403|ERR_014|NOT YOUR ITEM|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 상점을 소유하지 않은 경우                      | 403       | ERR_011    | NO STORE OWNED           |
+    | 상품이 존재하지 않는 경우                      | 404       | ERR_013    | ITEM NOT FOUND           |
+    | 다른 상점의 상품을 수정하려는 경우             | 403       | ERR_014    | NOT YOUR ITEM            |
 
 ##### 3-3) GET `/api/items` — 상품 목록 조회
 
@@ -585,6 +625,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 상품 목록 배열
     - 예시
+
       ```json
       [
       	{
@@ -607,9 +648,10 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |지정된 상점이 존재하지 않는 경우|404|ERR_010|STORE NOT FOUND|
+
+    | 상황                             | 상태 코드 | ERROR_CODE | ERROR_MSG       |
+    | -------------------------------- | --------- | ---------- | --------------- |
+    | 지정된 상점이 존재하지 않는 경우 | 404       | ERR_010    | STORE NOT FOUND |
 
 ##### 3-4) DELETE `/api/items/{item_id}` — 상품 삭제 (로그인 필요)
 
@@ -620,9 +662,11 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - URL 파라미터: `item_id` (문자열)
 
 - **응답**
@@ -631,13 +675,14 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 본문: 없음
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
-    |상품의 소유자가 아닌 경우|403|ERR_014|NOT YOUR ITEM|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 상품이 존재하지 않는 경우                      | 404       | ERR_013    | ITEM NOT FOUND           |
+    | 상품의 소유자가 아닌 경우                      | 403       | ERR_014    | NOT YOUR ITEM            |
 
 #### 4. `/api/orders` 엔드포인트
 
@@ -656,10 +701,13 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - 본문 예시
+
     ```json
     {
     	"items": [
@@ -680,6 +728,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 201
     - 본문: 생성된 주문 정보
     - 예시
+
       ```json
       {
       	"order_id": "a0debb7b-5854-4afd-8bd4-80fdffa21410",
@@ -721,16 +770,17 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |상품이 존재하지 않는 경우|404|ERR_013|ITEM NOT FOUND|
-    |재고가 부족한 경우|409|ERR_017|NOT ENOUGH STOCK|
-    |items가 빈 배열인 경우|422|ERR_018|EMPTY ITEM LIST|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                      | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우          | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 상품이 존재하지 않는 경우                      | 404       | ERR_013    | ITEM NOT FOUND           |
+    | 재고가 부족한 경우                             | 409       | ERR_017    | NOT ENOUGH STOCK         |
+    | items가 빈 배열인 경우                         | 422       | ERR_018    | EMPTY ITEM LIST          |
 
 ##### 4-2) GET `/api/orders/{order_id}` — 주문 조회 (로그인 필요)
 
@@ -741,9 +791,11 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - URL 파라미터: `order_id` (str)
 
 - **응답**
@@ -751,6 +803,7 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 상태 코드: 200
     - 본문: 주문 정보
     - 예시
+
       ```json
       {
       	"order_id": "a0debb7b-5854-4afd-8bd4-80fdffa21410",
@@ -792,13 +845,14 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
       ```
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |주문이 존재하지 않는 경우|404|ERR_019|ORDER NOT FOUND|
-    |다른 유저의 주문을 조회하려고 할 경우|403|ERR_020|NOT YOUR ORDER|
+
+    | 상황                                           | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | ---------------------------------------------- | --------- | ---------- | ------------------------ |
+    | Authorization 헤더가 제시되지 않은 경우        | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우 | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                      | 401       | ERR_007    | INVALID TOKEN            |
+    | 주문이 존재하지 않는 경우                      | 404       | ERR_019    | ORDER NOT FOUND          |
+    | 다른 유저의 주문을 조회하려고 할 경우          | 403       | ERR_020    | NOT YOUR ORDER           |
 
 ##### 4-3) PATCH `/api/orders/{order_id}` — 주문 상태 변경 (로그인 필요)
 
@@ -812,17 +866,22 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 - **요청**
   - 헤더에 다음 필드가 포함됨
+
     ```
     Authorization: Bearer {access_token}
     ```
+
   - URL 파라미터: `order_id` (문자열)
   - 본문 예시 (주문 취소)
+
     ```json
     {
     	"status": "CANCELED"
     }
     ```
+
   - 본문 예시 (구매 확정)
+
     ```json
     {
     	"status": "COMPLETE"
@@ -835,16 +894,17 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
     - 본문: 없음
 
   - **실패 응답**
-    |상황|상태 코드|ERROR_CODE|ERROR_MSG|
-    |---|---|---|---|
-    |요청 필드가 비어있는 경우|400|ERR_002|MISSING REQUIRED FIELDS|
-    |요청 필드의 형식이 올바르지 않은 경우|400|ERR_003|INVALID FIELD FORMAT|
-    |Authorization 헤더가 제시되지 않은 경우|401|ERR_005|UNAUTHENTICATED|
-    |Authorization 헤더 값의 형식이 비정상적인 경우|400|ERR_006|BAD AUTHORIZATION HEADER|
-    |토큰이 유효하지 않은 경우|401|ERR_007|INVALID TOKEN|
-    |주문이 존재하지 않는 경우|404|ERR_019|ORDER NOT FOUND|
-    |이미 취소되었거나 완료된 주문을 변경하려고 할 경우|409|ERR_021|INVALID ORDER STATUS|
-    |다른 유저의 주문을 변경하려고 할 경우|403|ERR_020|NOT YOUR ORDER|
+
+    | 상황                                               | 상태 코드 | ERROR_CODE | ERROR_MSG                |
+    | -------------------------------------------------- | --------- | ---------- | ------------------------ |
+    | 요청 필드가 비어있는 경우                          | 400       | ERR_002    | MISSING REQUIRED FIELDS  |
+    | 요청 필드의 형식이 올바르지 않은 경우              | 400       | ERR_003    | INVALID FIELD FORMAT     |
+    | Authorization 헤더가 제시되지 않은 경우            | 401       | ERR_005    | UNAUTHENTICATED          |
+    | Authorization 헤더 값의 형식이 비정상적인 경우     | 400       | ERR_006    | BAD AUTHORIZATION HEADER |
+    | 토큰이 유효하지 않은 경우                          | 401       | ERR_007    | INVALID TOKEN            |
+    | 주문이 존재하지 않는 경우                          | 404       | ERR_019    | ORDER NOT FOUND          |
+    | 이미 취소되었거나 완료된 주문을 변경하려고 할 경우 | 409       | ERR_021    | INVALID ORDER STATUS     |
+    | 다른 유저의 주문을 변경하려고 할 경우              | 403       | ERR_020    | NOT YOUR ORDER           |
 
 ### 4. EC2·RDS 및 CI/CD
 
@@ -864,6 +924,6 @@ ERD는 실제 ORM 모델 및 마이그레이션과 일치해야 하며, 테이�
 
 #### DB
 
-- EC2의 API 서버는 RDS MySQL 또는 OCI HeatWave를 사용해야 합니다. 로컬 DB 또는 EC2 내부 DB만 사용한 배포는 완료로 인정하지 않습니다.
+- EC2의 API 서버는 AWS RDS MySQL 또는 OCI HeatWave를 사용해야 합니다. 로컬 DB 또는 EC2 내부 DB만 사용한 배포는 완료로 인정하지 않습니다.
 - RDS에 Alembic 마이그레이션을 적용하고, EC2의 API를 통해 회원·상점·상품·주문 데이터가 저장·조회되는지 확인합니다.
 - RDS의 DB 포트 접근은 EC2 보안 그룹 등 필요한 출처로 제한합니다. DB 비밀번호·SSH 개인키·인증 키를 저장소에 올리지 않습니다.
