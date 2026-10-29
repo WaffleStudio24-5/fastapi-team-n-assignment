@@ -14,13 +14,6 @@ from wapang.database.settings import DB_SETTINGS
 from wapang.database.connection import get_db_session
 from wapang.settings import ENV
  
-# 하위 테스트 모듈에서 공통으로 사용할 플러그인/픽스처 로드
-pytest_plugins = [
-    "tests.stores.conftest",
-    "tests.items.conftest",
-]
-
-
 @pytest.fixture(autouse=True, scope="session")
 def set_test_env():
     ENV = "test"
@@ -110,19 +103,3 @@ def access_token(
     token: dict
 ) -> str:
     return token["access_token"]
-
-@pytest.fixture
-def another_user_access_token(
-    client: TestClient
-) -> str:
-    signup_req = {
-        "email": "another_user@snu.ac.kr",
-        "password": "password1234"
-    }
-    client.post("/api/users", json=signup_req)
-
-    signin_req = signup_req
-    res = client.post("/api/auth/tokens", json=signin_req)
-    res_json = res.json()
-
-    return res_json["access_token"]

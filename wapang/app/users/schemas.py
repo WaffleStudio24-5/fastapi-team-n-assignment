@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, field_validator
 
 from wapang.common.exceptions import InvalidFormatException
 
@@ -19,5 +19,4 @@ class UserResponse(BaseModel):
     address: str | None
     phone_number: str | None
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

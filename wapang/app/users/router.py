@@ -1,5 +1,5 @@
 from typing import Annotated
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 
 from wapang.app.auth.utils import login_with_header
 from wapang.app.users.models import User
@@ -9,7 +9,7 @@ from wapang.app.users.services import UserService
 user_router = APIRouter()
 
 
-@user_router.post("/")
+@user_router.post("/", status_code=status.HTTP_201_CREATED)
 def signup(
     signup_request: UserSignupRequest, user_service: Annotated[UserService, Depends()]
 ) -> UserResponse:
