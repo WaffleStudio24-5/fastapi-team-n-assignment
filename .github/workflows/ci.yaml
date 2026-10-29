@@ -1,4 +1,4 @@
-name: Required Assignment Tests
+name: CI
 
 on:
   push:
